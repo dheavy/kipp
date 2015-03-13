@@ -1,6 +1,7 @@
 (function () {
 
-  var v = '1.3.2';
+  var v = '1.9.1',
+      root = window.location.href.indexOf('localhost') != -1 ? 'mypleasure.local' : 'still-mountain-6425.herokuapp.com';
 
   if (window.jQuery === undefined || window.jQuery.fn.jQuery < v) {
     var done = false,
@@ -22,8 +23,9 @@
   function initBookmarklet() {
     window.KIPP = window.KIPP ? window.KIPP : {};
 
-    var css = ['./kipp.css'],
-        js = ['./kipp.js'];
+    var css = ['https://' + root + '/kipp/kipp.css'],
+        js = ['https://' + root + '/kipp/kipp.js'];
+
 
     if (KIPP.true) {
       sendOnMission();

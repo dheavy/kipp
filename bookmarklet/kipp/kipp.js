@@ -32,6 +32,7 @@
   }
 
   KIPP.ready = true;
+  KIPP.hasBuiltUI = false;
 
   KIPP.open = function () {
     if (KIPP.active) {
@@ -47,6 +48,45 @@
 
     console.log("[mypleasu.re KIPP] Now starting...");
 
+    $(document).ready(KIPP.findPatterns());
+  };
+
+  KIPP.close = function () {
+    console.log("[mypleasu.re KIPP] I'm out. See you next time!");
+    KIPP.active = false;
+    $kipp.fadeOut(function out() {
+      $kipp.remove();
+      $kipp = null;
+      $kippElementContainer = null;
+      $body.css('overflow', oldOverflowValue);
+      $body = null;
+      KIPP.hasBuiltUI = false;
+    });
+  };
+
+  KIPP.findPatterns = function () {
+    if (!KIPP.patterns) return;
+
+    $.each(KIPP.patterns, function iter(i, pattern) {
+      // Check URL.
+      if (window.location.href.indexOf(pattern.urlPattern) != -1) {
+        openSite(window.location.href);
+        return;
+      }
+
+      // Check DOM.
+      var $search = $(pattern.tag),
+          index = 0;
+      if ($search.length > 0) {
+        $.each($search, function iter(i, elm) {
+          KIPP.addElement(elm, pattern.generator, index);
+          index++;
+        });
+      }
+    });
+  };
+
+  KIPP.buildUI = function () {
     var kipp = document.createElement('div');
     kipp.id = 'mp-kipp';
     $kipp = $(kipp);
@@ -55,6 +95,11 @@
 
     var overlay = document.createElement('div');
     overlay.className += overlay.className ? ' mp-kipp-overlay' : 'mp-kipp-overlay';
+    var maxZ = Math.max.apply(null,$.map($('body > *'), function(e,n){
+    if($(e).css('position') == 'absolute')
+      return parseInt($(e).css('z-index')) || 1 ;
+    }));
+    overlay.style = 'z-index:' + maxZ;
     kipp.appendChild(overlay);
 
     var elementContainer = document.createElement('div');
@@ -71,37 +116,12 @@
     var $closeBtn = $(closeBtn);
     $closeBtn.bind('click', closeKIPP);
 
-    $(document).ready(KIPP.findPatterns());
-  };
-
-  KIPP.close = function () {
-    console.log("[mypleasu.re KIPP] I'm out. See you next time!");
-    KIPP.active = false;
-    $kipp.fadeOut(function out() {
-      $kipp.remove();
-      $kipp = null;
-      $kippElementContainer = null;
-      $body.css('overflow', oldOverflowValue);
-      $body = null;
-    });
-  };
-
-  KIPP.findPatterns = function () {
-    if (!KIPP.patterns) return;
-
-    $.each(KIPP.patterns, function iter(i, pattern) {
-      var $search = $(pattern.tag),
-          index = 0;
-      if ($search.length > 0) {
-        $.each($search, function iter(i, elm) {
-          KIPP.addElement(elm, pattern.generator, index);
-          index++;
-        });
-      }
-    });
+    KIPP.hasBuiltUI = true;
   };
 
   KIPP.addElement = function(elm, generator, i) {
+    if (!KIPP.hasBuiltUI) KIPP.buildUI();
+
     var elmContainer = document.createElement('div');
     elmContainer.className += elmContainer.className ? ' mp-kipp-elm' : 'mp-kipp-elm';
 
@@ -124,6 +144,7 @@
   KIPP.patterns = [
     {
       name: 'youtube',
+      urlPattern: 'www.youtube.com/watch?v=',
       tag: "iframe[src*='youtube.com/embed']",
       generator: function (embedUrl) {
         var id = embedUrl.substring(embedUrl.lastIndexOf('/') + 1);

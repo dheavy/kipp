@@ -37,17 +37,12 @@
     }
 
     function getStyles(files) {
-      try {
-        $.each(files, function iter(i, val) {
-          $('<link>').attr({ href: val, rel: 'stylesheet' }).appendTo('head');
-          if (i === files.length - 1) {
-            sendOnMission();
-          }
-        });
-      } catch (e) {
-        console.log("[mypleasu.re KIPP] Error loading of the style files. I give up.");
-        return false;
-      }
+      $.each(files, function iter(i, val) {
+        $('<link>').attr({ href: val, rel: 'stylesheet' }).appendTo('head');
+        if (i === files.length - 1) {
+          sendOnMission();
+        }
+      });
     }
 
     function getScripts(files) {
@@ -60,10 +55,6 @@
        .done(function done() {
           getScripts(files.slice(1));
        })
-       .fail(function fail() {
-          console.log("[mypleasu.re KIPP] Error loading one of the script files. I give up.");
-          return false;
-       });
     }
 
     getScripts(js);

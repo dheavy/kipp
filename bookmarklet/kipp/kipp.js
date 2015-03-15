@@ -76,6 +76,7 @@
     $.each(KIPP.patterns, function iter(i, pattern) {
       // Check URL.
       if (window.location.href.indexOf(pattern.urlPattern) != -1) {
+        KIPP.hasFoundSomething = true;
         openSite(window.location.href);
         return;
       }
@@ -84,6 +85,7 @@
       var $search = $(pattern.tag);
 
       if ($search.length > 0) {
+        KIPP.hasFoundSomething = true;
         $.each($search, function iter(i, elm) {
           KIPP.addElement(elm, pattern.generator, index);
           index++;

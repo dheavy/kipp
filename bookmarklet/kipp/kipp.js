@@ -128,61 +128,53 @@
   };
 
   KIPP.buildUI = function () {
-    var kipp = document.createElement('div');
-    kipp.id = 'mp-kipp';
-    $kipp = $(kipp);
+    // Main container.
+    $kipp = $('<div id="mp-kipp"></div>');
+    $body.append($kipp);
 
-    document.getElementsByTagName('body')[0].appendChild(kipp);
-
-    var overlay = document.createElement('div');
-    overlay.className += overlay.className ? ' mp-kipp-overlay' : 'mp-kipp-overlay';
-
-    var maxZ = Math.max.apply(null,$.map($('body > *'), function(e,n){
-    if($(e).css('position') == 'absolute')
-      return parseInt($(e).css('z-index')) || 1 ;
+    // Background overlay.
+    var $overlay = $('<div class="mp-kipp-overlay"></div>');
+    var maxZ = Math.max.apply(null, $.map($('body > *'), function (e, n) {
+      var $e = $(e);
+      if ($e.css('position') == 'absolute') {
+        return parseInt($e.css('z-index')) || 1;
+      }
     }));
+    $kipp.css('z-index', maxZ).append($overlay);
 
-    overlay.style = 'z-index:' + maxZ;
-    kipp.appendChild(overlay);
+    // Elements container, for videos found.
+    $kippElementContainer = $('<div class="mp-kipp-elm-container"></div>');
+    $kipp.append($kippElementContainer);
 
-    var elementContainer = document.createElement('div');
-    elementContainer.className += elementContainer ? ' mp-kipp-elm-container' : 'mp-kipp-elm-container';
-    kipp.appendChild(elementContainer);
-    $kippElementContainer = $(elementContainer);
+    // Close button.
+    var $closeBtn = $('<a href="#" class="mp-kipp-close-btn">&times;</a>');
+    $closeBtn.bind('touchstart click', closeKIPP);
+    $kipp.append($closeBtn);
 
-    var closeBtn = document.createElement('a');
-    closeBtn.className += closeBtn.className ? ' mp-kipp-close-btn' : 'mp-kipp-close-btn';
-    closeBtn.innerHTML = '&times;';
-    closeBtn.href = '#';
-    kipp.appendChild(closeBtn);
-
-    var $closeBtn = $(closeBtn);
-    $closeBtn.bind('click', closeKIPP);
-
+    // Flag after building is through.
     KIPP.hasBuiltUI = true;
   };
 
   KIPP.addElement = function(elm, generator, i) {
-    if (!KIPP.hasBuiltUI) KIPP.buildUI();
+    if (!KIPP.hasBuiltUI)        KIPP.buildUI();
     if (!KIPP.hasFoundSomething) KIPP.hasFoundSomething = true;
 
-    var elmContainer = document.createElement('div');
-    elmContainer.className += elmContainer.className ? ' mp-kipp-elm' : 'mp-kipp-elm';
-
-    var id = 'mp-kipp-elm-' + i;
-    elmContainer.id = id;
-
     var $elm = $(elm),
-        $elmContainer = $(elmContainer);
+        id = 'mp-kipp-elm-' + i,
+        $elmContainer = $('<div class="mp-kipp-elm" id="' + id + '"></div>'),
+        $addBtn = $('<a href="#" class="mp-kipp-add-btn" rel="' + id + '">Ajouter cette vidéo</a>');
 
-    $kippElementContainer.append(elmContainer);
-    $elm.clone().appendTo(elmContainer);
+    $kippElementContainer.append($elmContainer);
+    $elm.clone().appendTo($elmContainer);
 
     $('iframe', $elmContainer).attr('width', 400).attr('height', 'auto');
 
-    var $addBtn = $('<a href="#" class="mp-kipp-add-btn" rel="' + id + '">Ajouter cette vidéo</a>');
     $elmContainer.append($addBtn);
     $addBtn.bind('click', { generator: generator }, addBtnHandler);
+  };
+
+  KIPP.finalize = function(url) {
+
   };
 
   KIPP.patterns = [

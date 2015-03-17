@@ -6,7 +6,7 @@
     return false;
   }
 
-  var $body, $kipp, $kippElementContainer, openedWindow, oldOverflowValue,
+  var $window, $body, $kipp, $kippElementContainer, $finalizeContainer, openedWindow, oldOverflowValue,
       index = 0;
 
   function closeKIPP(e) {
@@ -20,7 +20,8 @@
         generator = e.data.generator,
         url = generator(embedUrl);
 
-    openSite(url);
+    //openSite(url);
+    KIPP.finalize(url);
   }
 
   function openSite(url) {
@@ -47,6 +48,8 @@
   KIPP.hasBuiltUI = false;
   KIPP.hasFoundSomething = false;
 
+  KIPP.addBtns = [];
+
   KIPP.open = function () {
     if (KIPP.isActive) {
       console.log("[mypleasu.re KIPP] I'm already active.");
@@ -61,7 +64,13 @@
 
     console.log("[mypleasu.re KIPP] Now starting...");
 
-    $(document).ready(KIPP.findPatterns());
+    window.onmessage = function (e) {
+      if (e.origin == 'https://' + root && e.data.event && e.data.event == 'done') {
+        KIPP.close();
+      }
+    };
+
+    $(KIPP.findPatterns());
   };
 
   KIPP.close = function () {
@@ -146,6 +155,10 @@
     $kippElementContainer = $('<div class="mp-kipp-elm-container"></div>');
     $kipp.append($kippElementContainer);
 
+    // Container for final input.
+    $finalizeContainer = $('<div class="mp-kipp-finalize-container"></div>');
+    $kipp.append($finalizeContainer);
+
     // Close button.
     var $closeBtn = $('<a href="#" class="mp-kipp-close-btn">&times;</a>');
     $closeBtn.bind('touchstart click', closeKIPP);
@@ -171,10 +184,18 @@
 
     $elmContainer.append($addBtn);
     $addBtn.bind('click', { generator: generator }, addBtnHandler);
+    KIPP.addBtns.push($addBtn);
   };
 
   KIPP.finalize = function(url) {
+    $.each(KIPP.addBtns, function iter(i, b) {
+      $(b).unbind();
+    });
 
+    $kippElementContainer.remove();
+
+    var $iframe = $('<iframe src="https://' + root + '/me/videos/create?u=' + url + '" width="100%" height="100%" frameborder="0"></iframe>');
+    $finalizeContainer.append($iframe).css('display', 'block');
   };
 
   KIPP.patterns = [
@@ -222,5 +243,5 @@
         }
       }
     }
-  ]
+  ];
 })();

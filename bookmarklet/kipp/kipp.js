@@ -1,247 +1,532 @@
-(function () {
-  var root = window.location.href.indexOf('localhost') != -1 ? 'mypleasure.local' : 'still-mountain-6425.herokuapp.com';
+(function mp(window, $) {
 
-  if (!window.KIPP) {
-    console.log("[mypleasu.re KIPP] Couldn't find namespace. I give up.");
-    return false;
-  }
+  /**************************************************************
+   *  KIPP - mypleasu.re bookmarklet.                           *
+   **************************************************************/
+  window.mypleasure.bookmarklet = (function() {
 
-  var $window, $body, $kipp, $kippElementContainer, $finalizeContainer, openedWindow, oldOverflowValue,
-      index = 0;
+    var kipp = null,
+        KIPP = null,
+        $window = $(window),
+        $body = $('body');
 
-  function closeKIPP(e) {
-    e.preventDefault();
-    $(e).unbind('click', closeKIPP);
-    KIPP.close();
-  }
+    KIPP = function () {
+      this.version = '0.2.0';
 
-  function addBtnHandler(e) {
-    var embedUrl = $('iframe', $('#' + e.target.rel)).attr('src'),
-        generator = e.data.generator,
-        url = generator(embedUrl);
+      // Boolean flags to control flow.
+      this.isActive = false;
+      this.hasBuiltUI = false;
+      this.hasFoundSomething = false;
 
-    //openSite(url);
-    KIPP.finalize(url);
-  }
+      // References jQuery-wrapped elements used by the app.
+      $body = null;
+      this.$overlay = null;
+      this.$container = null;
+      this.$thumbnails = null;
+      this.$collector = null;
+      this.$closeBtn = null;
 
-  function openSite(url) {
-    var features = 'menubar=no,location=no,resizable=no,scrollbars=no,status=no,left=50,top=50,width=640,height=480';
-    openedWindow = window.open(
-      'https://' + root + '/me/videos/create?u=' + url,
-      'MPCase',
-      features,
-      true
-    );
+      // Store old CSS values we'll be changing along the way.
+      this.oldBodyOverflowValue = '';
+      this.oldBodyPosition = '';
+      this.oldBodyWidth = '';
+      this.oldBodyHeight = '';
 
-    setTimeout(function popupBlockerCheck() {
-      if (!openedWindow || openedWindow.closed || openedWindow.closed == "undefined" || openedWindow == "undefined" || parseInt(openedWindow.innerWidth) == 0 || openedWindow.document.documentElement.clientWidth != 150 || openedWindow.document.documentElement.clientHeight != 150) {
-        openedWindow && openedWindow.close();
-        if (KIPP && KIPP.isActive) {
-          KIPP.isActive = false;
-        }
-        alert("La popup d'ajout de vidéo n'a pas réussi à s'ouvrir ! Autorisez-la en cliquant sur le bouton qui vient d'apparaître dans la barre d'adresse.");
-      }
-    }, 1000);
-  }
+      // Counter incremented on each created thumbnail, used to create IDs.
+      this.uiIndex = 0;
 
-  KIPP.isActive = false;
-  KIPP.hasBuiltUI = false;
-  KIPP.hasFoundSomething = false;
+      // Stores buttons listening for events to unbind them on garbage collection.
+      this.eventListeningButtons = [];
 
-  KIPP.addBtns = [];
+      // Root URL for CASE, the website.
+      this.CASE = window.location.href.indexOf('localhost') != -1 ? 'https://mypleasure.local' : 'https://still-mountain-6425.herokuapp.com';
 
-  KIPP.open = function () {
-    if (KIPP.isActive) {
-      console.log("[mypleasu.re KIPP] I'm already active.");
-      return false;
-    }
-
-    KIPP.isActive = true;
-
-    if (!$body) $body = $('body');
-    oldOverflowValue = $body.css('overflow');
-    $body.css('overflow', 'hidden');
-
-    console.log("[mypleasu.re KIPP] Now starting...");
-
-    window.onmessage = function (e) {
-      if (e.origin == 'https://' + root && e.data.event && e.data.event == 'done') {
-        KIPP.close();
-      }
+      return this;
     };
 
-    $(KIPP.findPatterns());
-  };
+    /**
+     * Start KIPP.
+     * Let it look for pattern in the source code of the current page.
+     *
+     * @return {KIPP}
+     */
+    KIPP.prototype.start = function () {
+      console.log('[KIPP] Start.');
 
-  KIPP.close = function () {
-    console.log("[mypleasu.re KIPP] I'm out. See you next time!");
-    KIPP.isActive = false;
+      // Singleton.
+      if (kipp.isActive) return;
+      kipp.isActive = true;
 
-    if ($kipp) {
-      $kipp.fadeOut(function out() {
-        $kipp.remove();
-        $kipp = null;
-        $kippElementContainer = null;
-        $body.css('overflow', oldOverflowValue);
-        $body = null;
-        KIPP.hasBuiltUI = false;
+      // Go look for videos.
+      kipp.findPatterns(sites);
+
+      return kipp;
+    };
+
+    /**
+     * Stop KIPP.
+     * Invoke methods for UI removal and freeing memory.
+     *
+     * @return {KIPP}
+     */
+    KIPP.prototype.stop = function () {
+      console.log('[KIPP] Stop.');
+
+      $window.off('resize', kipp.resizeOverlay);
+      kipp.$closeBtn.off('touchstart click', kipp.stop);
+
+      $body.css('overflow', kipp.oldBodyOverflowValue);
+      $body.css('position', kipp.oldBodyPosition);
+      $body.css('width', kipp.oldBodyWidth);
+      $body.css('height', kipp.oldBodyHeight);
+
+      kipp.close();
+      return kipp;
+    };
+
+    /**
+     * Close KIPP.
+     * Reset state variables.
+     *
+     * @return {KIPP}
+     */
+    KIPP.prototype.close = function () {
+      console.log('[KIPP] Close.');
+
+      // Reset flags.
+      kipp.hasBuiltUI = false;
+      kipp.isActive = false;
+      kipp.hasFoundSomething = false;
+      window.mypleasure.isOpen = false;
+
+      // Free jQuery objects from memory.
+      $body = null;
+
+      if (kipp.$closeBtn) {
+        kipp.$closeBtn.remove();
+        kipp.$closeBtn = null;
+      }
+
+      if (kipp.$collector) {
+        kipp.$collector.remove();
+        kipp.$collector = null;
+      }
+
+      if (kipp.$thumbnails) {
+        kipp.$thumbnails.remove();
+        kipp.$thumbnails = null;
+      }
+
+      if (kipp.$overlay) {
+        kipp.$overlay.remove();
+        kipp.$overlay = null;
+      }
+
+      if (kipp.$container) {
+        kipp.$container.remove();
+        kipp.$container = null
+      }
+
+      return kipp;
+    };
+
+    /**
+     * Inform that no video has been found on the page, and close KIPP.
+     *
+     * @return {KIPP}
+     */
+    KIPP.prototype.fail = function () {
+      alert("[mypleasu.re] Je n'arrive pas à trouver de vidéo sur cette page ! Désolé !");
+      window.mypleasure.hideLoader();
+      kipp.close();
+    };
+
+    /**
+     * Construct the UI.
+     *
+     * @return {KIPP}
+     */
+    KIPP.prototype.buildUI = function (addTnContainer) {
+      console.log('[KIPP] Build UI.');
+
+      addTnContainer = addTnContainer ? addTnContainer : true;
+
+      // Singleton.
+      if (kipp.hasBuiltUI) return;
+      kipp.hasBuiltUI = true;
+
+      // Endow body with version number.
+      // Store body's original value for 'overflow' and apply a new one.
+      $body = $('body');
+      $body.attr('data-mypleasure-bookmarklet-installed', kipp.version);
+      kipp.oldBodyOverflowValue = $body.css('overflow');
+      kipp.oldBodyPosition = $body.css('position');
+      kipp.oldBodyWidth = $body.css('width');
+      kipp.oldBodyHeight = $body.css('height');
+      $body.css({
+        'overflow': 'hidden',
+        'position': 'fixed',
+        'width': '100%',
+        'height': '100%'
       });
-    }
-  };
 
-  KIPP.findPatterns = function () {
-    if (!KIPP.patterns) return;
+      // Build main container.
+      kipp.$container = $('<div id="mp-kipp"></div>');
+      $body.append(kipp.$container);
 
-    $.each(KIPP.patterns, function iter(i, pattern) {
-      var location = window.location.href;
+      // Determine maximum z-index to apply it to the container.
+      var maxZ = Math.max.apply(null, $.map($('body > *'), function apply(e) {
+            var $e = $(e);
+            if ($e.css('position') == 'absolute') {
+              return parseInt($e.css('z-index')) || 1;
+            }
+          }));
+      kipp.$container.css('z-index', maxZ);
 
-      // Check URL.
-      if (pattern.urlPattern.test(location)) {
-        KIPP.hasFoundSomething = true;
-        openSite(window.location.href);
-        return;
+      // Add overlay. Ensure it fits and remains so.
+      kipp.$overlay = $('<div class="mp-kipp-overlay"></div>');
+      kipp.$container.append(kipp.$overlay);
+      $window.on('resize', kipp.resizeOverlay);
+
+      // Thumbnails container.
+      if (addTnContainer) {
+        kipp.$thumbnails = $('<div class="mp-kipp-tn-container"></div>');
+        kipp.$container.append(kipp.$thumbnails);
       }
 
-      // Check URL for tricky ones.
-      if (pattern.isTricky && pattern.trickyUrlPattern) {
-        if (pattern.trickyUrlPattern.test(location)) {
-          KIPP.hasFoundSomething = true;
-          pattern.trickMethod();
-          return;
-        }
-      }
+      // Container for final input, where user effectively connects a video.
+      kipp.$collector = $('<div class="mp-kipp-finalize-container"></div>');
+      kipp.$container.append(kipp.$collector);
 
-      // Check DOM.
-      KIPP.searchDOM(pattern);
-    });
+      // Close button.
+      kipp.$closeBtn = $('<a href="#" class="mp-kipp-close-btn">&times;</a>');
+      kipp.$closeBtn.on('touchstart click', kipp.stop);
+      kipp.$container.append(kipp.$closeBtn);
 
-    if (!KIPP.hasFoundSomething) {
-      alert("mypleasu.re — je n'arrive pas à trouver de vidéo sur cette page.");
-      KIPP.close();
-    }
-  };
+      // Remove loader anim, if visible.
+      window.mypleasure.hideLoader();
 
-  KIPP.searchDOM = function (pattern) {
-    console.log('[mypleasu.re KIPP] Searching DOM...');
-    var $search = $(pattern.selector);
+      return kipp;
+    };
 
-    console.log('[mypleasu.re KIPP] Searching selector: ' + pattern.selector);
+    /**
+     * Cycles through the list to find code pattern and possibly curate the matching videos.
+     *
+     * @param  {Array} sites  The list of sites with relevant data on code formatting.
+     * @return {KIPP|boolean} Returns false to break out of $.each loop when something is found.
+     */
+    KIPP.prototype.findPatterns = function (sites) {
+      console.log('[KIPP] Find patterns.');
 
-    if ($search.length > 0) {
-      KIPP.hasFoundSomething = true;
-      $.each($search, function iter(i, elm) {
-        KIPP.addElement(elm, pattern.generator, index);
-        index++;
+      var location = window.location.href,
+          self = kipp;
+
+      // Loop through all patterns from defined sites.
+      $.each(sites, function iter(i, pattern) {
+        console.log('[KIPP] - ' + pattern.name);
+
+        var cases = pattern.cases;
+        $.each(cases, function iter(i, c) {
+
+          // If current location matches a pattern, it's a go.
+          if (c.urlPattern.test(location) && c.direct) {
+            console.log('[KIPP] --- found!');
+            self.hasFoundSomething = true;
+            self.finalize(location);
+            return false;
+          }
+
+          // Otherwise, try looking for it in the DOM.
+          if (!self.hasFoundSomething) {
+            self.searchDOM(pattern.name, c);
+          }
+        });
       });
-    }
-  };
 
-  KIPP.buildUI = function () {
-    // Main container.
-    $kipp = $('<div id="mp-kipp"></div>');
-    $body.append($kipp);
+      if (!kipp.hasFoundSomething) kipp.fail();
+      return kipp;
+    };
 
-    // Background overlay.
-    var $overlay = $('<div class="mp-kipp-overlay"></div>');
-    var maxZ = Math.max.apply(null, $.map($('body > *'), function (e, n) {
-      var $e = $(e);
-      if ($e.css('position') == 'absolute') {
-        return parseInt($e.css('z-index')) || 1;
+    /**
+     * Traverse the DOM to find code patterns.
+     *
+     * @param  {string} name       The site name.
+     * @param  {Object} searchCase Contains regex and other data to base DOM analysis on.
+     * @return {KIPP|boolean} Returns false to break out of $.each loop when something is found.
+     */
+    KIPP.prototype.searchDOM = function (name, searchCase) {
+      console.log("[KIPP] -- search DOM for " + name + " with selector '" + searchCase.selector + "'.");
+
+      var $search = $(searchCase.selector),
+          self = kipp;
+
+      if ($search.length > 0) {
+        kipp.hasFoundSomething = true;
+        $.each($search, function iter(i, elm) {
+          self.scrapeElement(elm, searchCase.urlGenerator, searchCase.thumbsStrategy, kipp.uiIndex);
+          kipp.uiIndex++;
+          return false;
+        });
       }
-    }));
-    $kipp.css('z-index', maxZ).append($overlay);
 
-    // Elements container, for videos found.
-    $kippElementContainer = $('<div class="mp-kipp-elm-container"></div>');
-    $kipp.append($kippElementContainer);
+      return kipp;
+    };
 
-    // Container for final input.
-    $finalizeContainer = $('<div class="mp-kipp-finalize-container"></div>');
-    $kipp.append($finalizeContainer);
+    /**
+     * Scrape a found video element to display it to the user.
+     *
+     * @param  {string}   element        The DOM element to scrape.
+     * @param  {Function} urlGenerator   Generates the actual video URL from its embed code.
+     * @param  {Function} thumbsStrategy Generates, from its embed code, the video thumbnails presented to the user.
+     * @param  {integer}  index          A UID used when adding thumbnails in the DOM for retrieval purposes.
+     * @return {KIPP}
+     */
+    KIPP.prototype.scrapeElement = function (element, urlGenerator, thumbsStrategy, index) {
+      console.log('[KIPP] Add element.');
 
-    // Close button.
-    var $closeBtn = $('<a href="#" class="mp-kipp-close-btn">&times;</a>');
-    $closeBtn.bind('touchstart click', closeKIPP);
-    $kipp.append($closeBtn);
-
-    // Flag after building is through.
-    KIPP.hasBuiltUI = true;
-  };
-
-  KIPP.addElement = function(elm, generator, i) {
-    if (!KIPP.hasBuiltUI)        KIPP.buildUI();
-    if (!KIPP.hasFoundSomething) KIPP.hasFoundSomething = true;
-
-    var $elm = $(elm),
-        id = 'mp-kipp-elm-' + i,
-        $elmContainer = $('<div class="mp-kipp-elm" id="' + id + '"></div>'),
-        $addBtn = $('<a href="#" class="mp-kipp-add-btn" rel="' + id + '">Ajouter cette vidéo</a>');
-
-    $kippElementContainer.append($elmContainer);
-    $elm.clone().appendTo($elmContainer);
-
-    $('iframe', $elmContainer).attr('width', 400).attr('height', 'auto');
-
-    $elmContainer.append($addBtn);
-    $addBtn.bind('click', { generator: generator }, addBtnHandler);
-    KIPP.addBtns.push($addBtn);
-  };
-
-  KIPP.finalize = function(url) {
-    $.each(KIPP.addBtns, function iter(i, b) {
-      $(b).unbind();
-    });
-
-    $kippElementContainer.remove();
-
-    var $iframe = $('<iframe src="https://' + root + '/me/videos/create?u=' + url + '" width="100%" height="100%" frameborder="0"></iframe>');
-    $finalizeContainer.append($iframe).css('display', 'block');
-  };
-
-  KIPP.patterns = [
-    {
-      name: 'youtube',
-      urlPattern: /www\.youtube\.com\/watch\?v=/,
-      isTricky: false,
-      trickyUrlPattern: null,
-      selector: "iframe[src*='youtube.com/embed']",
-      generator: function (embedUrl) {
-        var id = embedUrl.substring(embedUrl.lastIndexOf('/') + 1);
-        return 'https://www.youtube.com/watch?v=' + id;
-      },
-      trickMethod: null
-    },
-    {
-      name: 'vimeo',
-      urlPattern: /vimeo\.com\/(\d+)/,
-      isTricky: true,
-      trickyUrlPattern: /vimeo\.com(\/){0}(?! \d+)/gi,
-      selector: "iframe[src*='player.vimeo.com/video/']",
-      generator: function (embedUrl) {
-        var matches = /(\/)(\d+)/.exec(embedUrl), id;
-        if (matches[2]) {
-          id = matches[2];
-          return 'https://vimeo.com/' + id;
-        }
-      },
-      trickMethod: function () {
-        console.log("[mypleasu.re KIPP] Implementing trick method for Vimeo's front page.");
-
-        this.selector = '.faux_player';
-
-        var $search = $(this.selector);
-        if ($search.length > 0) {
-          var gen = KIPP.patterns[1].generator;
-
-          KIPP.hasFoundSomething = true;
-          $.each($search, function iter(i, elm) {
-            var $elm = $(elm),
-                element = $('<iframe src="https://player.vimeo.com/video/' + $elm.attr('data-clip-id') + '?title=0&byline=0&portrait=0" width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe');
-            KIPP.addElement(element, gen, index);
-            index++;
-          });
-        }
+      // Build UI, if needed.
+      if (!this.hasBuiltUI) {
+        kipp.buildUI();
       }
+
+      // Create UI for the element.
+      var id = 'mp-kipp-elm-' + index,
+          $element = $(element),
+          $elementContainer = $('<div class="mp-kipp-elm" id="' + id + '"></div>'),
+          $addBtn = $('<a href="#" class="mp-kipp-add-btn" rel="' + id + '">Ajouter cette vidéo</a>'),
+          self = kipp;
+
+      // Append to the view container.
+      kipp.$thumbnails.append($elementContainer);
+      thumbsStrategy($element, $elementContainer);
+      $elementContainer.append($addBtn);
+
+      // Adjust the layout.
+      $('iframe', $elementContainer).attr('width', 400).attr('height', 'auto');
+
+      // Add and prepare button for collecting video.
+      $addBtn.on('click', { urlGenerator: urlGenerator }, self.onAdd);
+
+      // Add button to a list of element listing to events.
+      // We'll unbind all events from elements in the list when we close the bookmarklet.
+      kipp.eventListeningButtons.push($addBtn);
+
+      return kipp;
+    };
+
+    /**
+     * Event handler invoked when "add" button is clicked.
+     * Finalizes acquisition of the related video.
+     *
+     * @param  {jQuery.Event} e  The event object passed during the process.
+     * @return {KIPP}
+     */
+    KIPP.prototype.onAdd = function (e) {
+      var embedURL = $('iframe', $('#' + e.target.rel)).attr('src'),
+          urlGenerator = e.data.urlGenerator,
+          url = urlGenerator(embedURL);
+
+
+      kipp.finalize(url);
+
+      return kipp;
+    };
+
+    /**
+     * Resize the background overlay to fit the window.
+     *
+     * @return {KIPP}
+     */
+    KIPP.prototype.resizeOverlay = function () {
+      if ($window && kipp.$overlay) {
+        kipp.$overlay.width($window.width());
+        kipp.$overlay.height($window.height());
+      }
+
+      return kipp;
+    };
+
+    /**
+     * Finalize the acquisition of the video by invoking the relevant page from CASE in an iframe.
+     *
+     * @param  {string} url  The video URL to passed to CASE.
+     * @return {KIPP}
+     */
+    KIPP.prototype.finalize = function (url) {
+      // Unbind obsolete event listeners.
+      $.each(kipp.eventListeningButtons, function iter(i, b) {
+        $(b).unbind();
+      });
+
+      // Build UI, minus thumbnails container.
+      kipp.buildUI(false);
+      if (kipp.$thumbnails) {
+        kipp.$thumbnails.remove();
+      }
+
+      // Create final view with iFrame from CASE.
+      var $iframe = $('<iframe src="' + this.CASE + '/me/videos/create?u=' + url + '" width="100%" height="100%" frameborder="0"></iframe>');
+      kipp.$collector.append($iframe).css('display', 'block');
+
+      return kipp;
+    };
+
+    // Create instance of KIPP.
+    kipp = new KIPP();
+
+    /**
+     * List of sites and code pattern to find videos.
+     *
+     * @type {Array}
+     */
+    var sites = [
+      {
+        name: 'youtube',
+
+        // Youtube: all cases.
+        cases: [
+          {
+            urlPattern: /www\.youtube\.com\/watch\?v=/,
+            direct: true,
+            selector: 'iframe[src*="youtube.com/embed"]',
+            thumbsStrategy: function ($target, $container) {
+              return $target.clone().appendTo($container);
+            },
+            urlGenerator: function (embedURL) {
+              var id = embedURL.substring(embedURL.lastIndexOf('/') + 1);
+              return 'https://www.youtube.com/watch?v=' + id;
+            }
+          }
+        ]
+      },
+
+      {
+        name: 'vimeo',
+
+        // Vimeo: based on url.
+        cases: [
+          {
+            urlPattern: /vimeo\.com\/(\d+)/,
+            direct: true,
+            selector: 'iframe[src*="player.vimeo.com/video/"]',
+            thumbsStrategy: function ($target, $container) {
+              return $target.clone().appendTo($container);
+            },
+            urlGenerator: function (embedURL) {
+              var matches = /(\/)(\d+)/.exec(embedURL), id;
+              if (matches[2]) {
+                id = matches[2];
+                return 'https://vimeo.com/' + id;
+              }
+            }
+          },
+
+          // Vimeo: listings of video (e.g. homepage).
+          {
+            urlPattern: /vimeo\.com(\/){0}(?! \d+)/gi,
+            direct: false,
+            selector: '.faux_player',
+            thumbsStrategy: function ($target, $container) {
+              var id = $target.attr('data-clip-id'),
+                  $iframe = $('<iframe src="https://player.vimeo.com/video/' + id + '?title=0&amp;byline=0&amp;portrait=0" width="400" height="auto" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" kwframeid="1"></iframe>');
+
+              return $iframe.appendTo($container);
+            },
+            urlGenerator: function (embedURL) {
+              var matches = /(\/)(\d+)/.exec(embedURL), id;
+              if (matches[2]) {
+                id = matches[2];
+                return 'https://vimeo.com/' + id;
+              }
+            }
+          },
+
+          // Vimeo: hero video display.
+          {
+            urlPattern: /vimeo\.com/,
+            direct: false,
+            selector: '#video',
+            thumbsStrategy: function($target, $container) {
+              var id = $('.player_container', $target).attr('id').substr(5),
+                  $iframe = $('<iframe src="https://player.vimeo.com/video/' + id + '?title=0&amp;byline=0&amp;portrait=0" width="400" height="auto" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" kwframeid="1"></iframe>');
+
+              return $iframe.appendTo($container);
+            },
+            urlGenerator: function(embedURL) {
+              var matches = /(\/)(\d+)/.exec(embedURL), id;
+              if (matches[2]) {
+                id = matches[2];
+                return 'https://vimeo.com/' + id;
+              }
+            }
+          },
+
+          // Vimeo: couchmode.
+          {
+            urlPattern: /vimeo\.com/,
+            direct: false,
+            selector: '#big_screen',
+            thumbsStrategy: function($target, $container) {
+              var videoSrc = $('video', $target).attr('src'),
+                  id = videoSrc.substring(videoSrc.indexOf('=') + 1, videoSrc.indexOf('_')),
+                  $iframe = $('<iframe src="https://player.vimeo.com/video/' + id + '?title=0&amp;byline=0&amp;portrait=0" width="400" height="auto" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen="" kwframeid="1"></iframe>');
+
+              return $iframe.appendTo($container);
+            },
+            urlGenerator: function(embedURL) {
+              var matches = /(\/)(\d+)/.exec(embedURL), id;
+              if (matches[2]) {
+                id = matches[2];
+                return 'https://vimeo.com/' + id;
+              }
+            }
+          }
+        ]
+      },
+      {
+        name: 'dailymotion',
+        cases: [
+
+          // Dailymotion: based on URL.
+          {
+            urlPattern: /dailymotion\.com\/video/,
+            direct: true,
+            selector: '#content.fluid[itemtype="http://schema.org/VideoObject"]',
+            thumbsStrategy: function ($target, $container) {
+              var link = $('link[itemprop="embedURL"]', $target).attr('href');
+                  id = link.substring(link.lastIndexOf('/') + 1),
+                  $iframe = $('<iframe frameborder="0" width="400" height="auto" src="//www.dailymotion.com/embed/video/' + id + '" allowfullscreen></iframe>');
+
+              return $iframe.appendTo($container);
+            },
+            urlGenerator: function (embedURL) {
+              return 'https://www.dailymotion.com/video/' + embedURL.substring(embedURL.lastIndexOf('/') + 1);
+            }
+          },
+
+          {
+            urlPattern: /dailymotion\.com/,
+            direct: false,
+            selector: 'iframe[src*="//www.dailymotion.com/embed/video"]',
+            thumbsStrategy: function ($target, $container) {
+              var $iframe = $('<iframe frameborder="0" width="400" height="auto" src="' + $target.attr('src') + '" allowfullscreen></iframe>');
+              return $iframe.appendTo($container);
+            },
+            urlGenerator: function (embedURL) {
+              return 'https://www.dailymotion.com/video/' + embedURL.substring(embedURL.lastIndexOf('/') + 1);
+            }
+          }
+        ]
+      }
+    ];
+
+    /**
+     * Public API.
+     */
+    return {
+      start: kipp.start,
+      stop: kipp.stop
     }
-  ];
-})();
+  })();
+
+})(window, jQuery);

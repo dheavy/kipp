@@ -33,7 +33,7 @@ function onMessage(request, sender, sendResponse) {
       var eventListeningButtons = [];
 
       // Root URL for CASE, the website.
-      var CASE = window.location.href.indexOf('localhost') != -1 ? 'https://mypleasure.local' : 'https://still-mountain-6425.herokuapp.com';
+      var CASE = window.location.href.indexOf('localhost') != -1 ? 'https://mypleasure.local' : 'https://mypleasure.local'/*'https://still-mountain-6425.herokuapp.com'*/;
 
       function sendOnMission() {
         if (isKippActive) return;
@@ -131,6 +131,10 @@ function onMessage(request, sender, sendResponse) {
         $container.append($closeBtn);
       }
 
+      function nextCase() {
+
+      }
+
       function findPatterns() {
         console.log('[KIPP] Find patterns.');
 
@@ -156,14 +160,12 @@ function onMessage(request, sender, sendResponse) {
               }
             });
           });
-
-          if(!hasFoundSomething) {
-            fail();
-          }
         }
       };
 
       function searchDOM(name, searchCase) {
+        if (hasFoundSomething) return;
+
         console.log("[KIPP] -- search DOM for " + name + " with selector '" + searchCase.selector + "'.");
 
         var $search = $(searchCase.selector);

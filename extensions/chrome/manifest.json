@@ -1,0 +1,36 @@
+{
+  "name": "MyPleasu.re Collect Button",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Collect videos from webpages and add them to your mypleasu.re collections.",
+
+  "icons": {
+    "16": "icons/16x16.png",
+    "48": "icons/48x48.png",
+    "128": "icons/128x128.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/19x19.png",
+      "38": "icons/38x38.png"
+    },
+    "default_title": "Capture videos in page"
+  },
+  "background": {
+    "scripts": ["scripts/background.js"],
+    "persistent": false
+  },
+  "permissions": [
+    "tabs",
+    "https://*/*",
+    "http://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["scripts/jquery.min.js", "scripts/lodash.min.js", "scripts/sites.js", "scripts/content.js"],
+      "css": ["styles/style.css"]
+    }
+  ]
+}

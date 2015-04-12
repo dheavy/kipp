@@ -1,6 +1,6 @@
 {
   "name": "MyPleasu.re Collect Button",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "manifest_version": 2,
   "description": "Collect videos from webpages and add them to your mypleasu.re collections.",
 
@@ -15,7 +15,7 @@
       "19": "icons/19x19.png",
       "38": "icons/38x38.png"
     },
-    "default_title": "Capture videos in page"
+    "default_title": "mypleasure - capturer les vidéos sur la page"
   },
   "background": {
     "scripts": ["scripts/background.js"],

@@ -33,7 +33,7 @@ function onMessage(request, sender, sendResponse) {
       var eventListeningButtons = [];
 
       // Root URL for CASE, the website.
-      var CASE = window.location.href.indexOf('localhost') != -1 ? 'https://mypleasure.local' : 'https://mypleasure.local'/*'https://still-mountain-6425.herokuapp.com'*/;
+      var CASE = window.location.href.indexOf('localhost') != -1 ? 'https://mypleasure.local' : 'https://still-mountain-6425.herokuapp.com';
 
       function sendOnMission() {
         if (isKippActive) return;

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "manifest_version": 2,
   "description": "Récupérer les vidéos d'une page web pour les ajouter à vos collections sur MyPleasu.re.",
-  "update_url": "https://mypleasure.local/extensions/chrome/updates.xml",
+  "update_url": "https://still-mountain-6425.herokuapp.com/extensions/chrome/updates.xml",
 
   "icons": {
     "16": "icons/16x16.png",

@@ -136,5 +136,41 @@ var sites = [
         }
       }
     ]
+  },
+  {
+    name: 'youporn',
+    cases: [
+      {
+        urlPattern: /(youporn\.com\/watch\/\d+)/,
+        direct: true,
+        selector: '#videoWrapper',
+        thumbsStrategy: function ($target, $container) {
+          var $obj = $('object[type="application/x-shockwave-flash"]', $target),
+              flashVars = $obj.find('param[name="flashvars"]').attr('value'),
+              imgUrl = flashVars.substring(flashVars.indexOf('image_url=') + 10, flashVars.indexOf('jpg&') + 3),
+              tmp = imgUrl.substring(imgUrl.indexOf('phncdn.com/') + 21),
+              id = tmp.substring(0, tmp.indexOf('/'));
+
+          var $iframe = $('<iframe frameborder="0" data-id="' + id + '" width="400" height="auto" src="http://www.youporn.com/embed/' + id + '" allowfullscreen></iframe>');
+          return $iframe.appendTo($container);
+        },
+        urlGenerator: function (embedURL) {
+          return 'http://www.youporn.com/watch/' + $(embedURL).attr('data-id');
+        }
+      },
+      {
+        urlPattern: /(youporn\.com\/watch\/\d+)/,
+        direct: false,
+        selector: 'iframe[src*="youporn.com"]',
+        thumbsStrategy: function ($target, $container) {
+          var $iframe = $('<iframe frameborder="0" width="400" height="auto" src="' + $target.attr('src') + '" allowfullscreen></iframe>');
+          return $iframe.appendTo($container);
+        },
+        urlGenerator: function (embedURL) {
+          var id = embedURL.substring(embedURL.indexOf('embed/') + 7);
+          return 'http://www.youporn.com/watch/' + id;
+        }
+      }
+    ]
   }
 ];

@@ -1,6 +1,6 @@
 {
   "name": "Collecteur MyPleasu.re",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "manifest_version": 2,
   "description": "Récupérer les vidéos d'une page web pour les ajouter à vos collections sur MyPleasu.re.",
   "update_url": "https://still-mountain-6425.herokuapp.com/extensions/chrome/updates.xml",
@@ -31,7 +31,7 @@
     {
       "matches": ["http://*/*", "https://*/*"],
       "js": ["scripts/jquery.min.js", "scripts/lodash.min.js", "scripts/sites.js", "scripts/content.js"],
-      "css": ["styles/style.css"]
+      "css": ["styles/normalize.min.css", "styles/style.css"]
     }
   ]
 }

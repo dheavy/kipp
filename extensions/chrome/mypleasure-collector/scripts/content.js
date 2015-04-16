@@ -154,18 +154,14 @@ function onMessage(request, sender, sendResponse) {
                 return false;
               }
 
-              // Otherwise, try looking for it in the DOM.
-              if (!hasFoundSomething) {
-                searchDOM(pattern.name, c);
-              }
+              // Try looking for it in the DOM.
+              searchDOM(pattern.name, c);
             });
           });
         }
       };
 
       function searchDOM(name, searchCase) {
-        if (hasFoundSomething) return;
-
         console.log("[KIPP] -- search DOM for " + name + " with selector '" + searchCase.selector + "'.");
 
         var $search = $(searchCase.selector);

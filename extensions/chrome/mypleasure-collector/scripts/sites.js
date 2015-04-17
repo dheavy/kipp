@@ -172,5 +172,24 @@ var sites = [
         }
       }
     ]
+  },
+  {
+    name: 'xvideos',
+    cases: [
+      {
+        urlPattern: /(xvideos\.com\/video\d+)/,
+        direct: true,
+        selector: '#flash-player-embed',
+        thumbsStrategy: function ($target, $constuctor) {
+          var flashvars = $target.attr('flashvars'),
+              id = flashvars.substring(flashvars.indexOf('id_video=') + 9, flashvars.indexOf('&')),
+              $iframe = $('<iframe src="http://flashservice.xvideos.com/embedframe/' + id + '" data-id="' + id + '" frameborder=0 width="400" height="auto"></iframe>');
+          return $iframe.appendTo($container);
+        },
+        urlGenerator: function (embedURL) {
+          return 'http://www.xvideos.com/video' + $(embedURL).attr('data-id');
+        }
+      }
+    ]
   }
 ];

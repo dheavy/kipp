@@ -180,14 +180,31 @@ var sites = [
         urlPattern: /(xvideos\.com\/video\d+)/,
         direct: true,
         selector: '#flash-player-embed',
-        thumbsStrategy: function ($target, $constuctor) {
+        thumbsStrategy: function ($target, $container) {
           var flashvars = $target.attr('flashvars'),
               id = flashvars.substring(flashvars.indexOf('id_video=') + 9, flashvars.indexOf('&')),
               $iframe = $('<iframe src="http://flashservice.xvideos.com/embedframe/' + id + '" data-id="' + id + '" frameborder=0 width="400" height="auto"></iframe>');
           return $iframe.appendTo($container);
         },
         urlGenerator: function (embedURL) {
-          return 'http://www.xvideos.com/video' + $(embedURL).attr('data-id');
+          var id = $(embedURL).attr('data-id');
+          return 'http://www.xvideos.com/video';
+        }
+      },
+      {
+        urlPattern: /(xvideos\.com\/video\d+)/,
+        direct: false,
+        selector: 'iframe[src*="flashservice.xvideos.com/embedframe"]',
+        thumbsStrategy: function ($target, $container) {
+          var src = $target.attr('src'),
+              id = src.substring(src.lastIndexOf('/') + 1),
+              $iframe = $('<iframe src="http://flashservice.xvideos.com/embedframe/' + id + '" data-id="' + id + '" frameborder=0 width="400" height="auto"></iframe>');
+          return $iframe.appendTo($container);
+        },
+        urlGenerator: function (embedURL) {
+          var id = embedURL.substring(embedURL.lastIndexOf('/') + 1);
+
+          return 'http://www.xvideos.com/video' + id;
         }
       }
     ]

@@ -1,5 +1,5 @@
 var webpackConfig = require('../../config/webpack/base-webpack-config');
 
 module.exports = webpackConfig(
-  'dev', __dirname + '/src/content.js', './dist/js', 'content.js'
+  process.env.NODE_ENV || 'production', __dirname + '/src/content.js', './dist/js', 'content.js'
 );

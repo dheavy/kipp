@@ -6,11 +6,11 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --require ./test/test-helper.js 'test/**/*.@(js|jsx)'",
     "test:watch": "npm run test -- --watch",
-    "build:manifest": "node ./config/manifestnode",
+    "build:manifest": "node ./config/manifest",
     "build:content": "NODE_ENV=production webpack -p --config ./src/content/webpack.config.js",
     "build:event": "NODE_ENV=production webpack -p --config ./src/event/webpack.config.js",
     "build:popup": "NODE_ENV=production webpack -p --config ./src/popup/webpack.config.js",
-    "build": "npm build:manifest && npm run build:popup && npm run build:event && npm run build:content"
+    "build": "npm run build:manifest && npm run build:popup && npm run build:event && npm run build:content"
   },
   "repository": {
     "type": "git",

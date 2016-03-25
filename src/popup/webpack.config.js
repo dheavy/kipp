@@ -1,5 +1,5 @@
 var webpackConfig = require('../../config/webpack/base-webpack-config');
 
 module.exports = webpackConfig(
-  'dev', './src/event.js', '../../dist/', 'event.js'
+  'dev', __dirname + '/src/popup.js', './dist/js', 'popup.js'
 );

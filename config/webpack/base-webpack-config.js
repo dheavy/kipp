@@ -1,6 +1,6 @@
 var webpack = require('webpack');
 
-module.exports = (function (env, entryFile, outputPath, outputFilename) {
+module.exports = function (env, entryFile, outputPath, outputFilename) {
   env = env ? env : 'production';
 
   return {
@@ -18,4 +18,4 @@ module.exports = (function (env, entryFile, outputPath, outputFilename) {
       new webpack.HotModuleReplacementPlugin()
     ]
   }
-})(env, entryFile, outputPath, outputFilename);
+};

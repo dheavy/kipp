@@ -1,3 +1,3 @@
-module.exports = (function (entryFile) {
+module.exports = function (entryFile) {
   return [entryFile];
-})(entryFile);
+};

@@ -1,3 +1,6 @@
+/**
+ * Build manifest file using data from package.json.
+ */
 var fs = require('fs');
 var stream = require('stream');
 var packageJson = require(__dirname + '/../../package.json');

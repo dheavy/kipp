@@ -1,9 +1,10 @@
-module.exports = function (name, title, description, version, useOptionPage) {
+module.exports = function (version, useOptionPage) {
   var manifest = {
-    name: name,
+    name: '__MSG_extName__',
     version: version,
     manifest_version: 2,
-    description: description,
+    description: '__MSG_extDescription__',
+    'default_locale': 'en',
     icons: {
       '16': 'images/icon-16.png',
       '128': 'images/icon-128.png'
@@ -33,7 +34,7 @@ module.exports = function (name, title, description, version, useOptionPage) {
         '19': 'images/icon-19.png',
         '38': 'images/icon-38.png'
       },
-      default_title: title,
+      default_title: '__MSG_browserActionTitle__',
       default_popup: 'popup.html'
     }
   };

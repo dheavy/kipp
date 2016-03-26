@@ -1,0 +1,14 @@
+{
+  "extName": {
+    "message": "MyPleasu.re - Add videos",
+    "description": "Extension name."
+  },
+  "extDescription": {
+    "message": "Add videos from the current webpage to your collections in MyPleasure.",
+    "description": "Extension description."
+  },
+  "browserActionTitle": {
+    "message": "Add videos",
+    "description": "Browser action button tooltip."
+  }
+}

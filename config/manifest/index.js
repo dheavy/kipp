@@ -1,10 +1,7 @@
 var fs = require('fs');
 var stream = require('stream');
 var packageJson = require(__dirname + '/../../package.json');
-var manifestJson = require('./manifest')(
-  packageJson.name, 'Add videos', packageJson.description, packageJson.version, false
-);
-
+var manifestJson = require('./manifest')(packageJson.version, false);
 var destination = __dirname + '/../../dist/manifest.json';
 
 module.exports = (function () {

@@ -8,7 +8,6 @@ module.exports = function (name, title, description, version, useOptionPage) {
       '16': 'images/icon-16.png',
       '128': 'images/icon-128.png'
     },
-    default_locale: 'en',
     permissions: [
       'activeTab',
       'http://*/*',
@@ -31,8 +30,8 @@ module.exports = function (name, title, description, version, useOptionPage) {
     ],
     browser_action: {
       default_icon: {
-        '19': 'images/icon19.png',
-        '38': 'images/icon38.png'
+        '19': 'images/icon-19.png',
+        '38': 'images/icon-38.png'
       },
       default_title: title,
       default_popup: 'popup.html'

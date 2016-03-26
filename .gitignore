@@ -39,3 +39,7 @@ dist/js
 dist/manifest.json
 dist/*.html
 
+# Typescript
+src/**/*.js
+src/**/*.js.map
+!src/**/webpack.config.js

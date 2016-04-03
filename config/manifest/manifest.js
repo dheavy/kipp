@@ -10,6 +10,7 @@ module.exports = function (version, useOptionPage) {
       '128': 'images/icon-128.png'
     },
     permissions: [
+      'storage',
       'activeTab',
       'http://*/*',
       'https://*/*'

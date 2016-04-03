@@ -15,7 +15,12 @@ module.exports = function (env, entryFile, outputPath, outputFilename) {
       hot: true
     },
     plugins: [
-      new webpack.HotModuleReplacementPlugin()
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.DefinePlugin({
+        __DEV__: process.env.NODE_ENV !== 'production',
+        __PRODUCTION__: process.env.NODE_ENV === 'production',
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+      })
     ]
   }
 };

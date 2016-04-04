@@ -1,10 +1,12 @@
-import {Map} from 'immutable';
+import {Map, List} from 'immutable';
 
 export const INITIAL_STATE = Map({
   user: Map({
     username: '',
     isLoggedIn: false,
     token: '',
-    collections: Map()
+    lastLogin: null,
+    lastAction: null,
+    collections: List()
   })
 });

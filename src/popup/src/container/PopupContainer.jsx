@@ -1,5 +1,6 @@
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import React, {Component, PropTypes} from 'react';
+import LoginForm from '../components/LoginForm';
 import {connect} from 'react-redux';
 
 class PopupContainer extends Component {
@@ -14,8 +15,10 @@ class PopupContainer extends Component {
 
   render() {
     return (
-      <div>
-        {this.props.user.get('isLoggedIn') === true ? 'HELLO!' : 'LOG IN'}
+      <div className="container-fluid">
+        {this.props.user.get('isLoggedIn') === true ?
+          'HELLO!' :
+          <LoginForm />}
       </div>
     );
   }

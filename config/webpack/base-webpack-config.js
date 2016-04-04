@@ -7,7 +7,7 @@ module.exports = function (env, entryFile, outputPath, outputFilename) {
     entry: require('./entries.' + env + '')(entryFile),
     module: require('./modules'),
     resolve: {
-      extensions: ['', '.ts', '.tsx']
+      extensions: ['', '.js', '.jsx']
     },
     output: require('./output')(outputPath, outputFilename),
     devServer: {

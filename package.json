@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --require ./test/test-helper.js 'test/**/*.@(js|jsx)'",
     "test:watch": "npm run test -- --watch",
-    "serve": "echo 'Starting dev server\n--------------------\nPopup -> http://localhost:8080/dist/popup.html\n\n\n' && node_modules/webpack-dev-server/bin/webpack-dev-server.js",
+    "serve": "node_modules/webpack-dev-server/bin/webpack-dev-server.js --content-base dist",
     "build:manifest": "node ./config/manifest",
     "build:content": "NODE_ENV=production webpack -p --config ./src/content/webpack.config.js",
     "build:event": "NODE_ENV=production webpack -p --config ./src/event/webpack.config.js",

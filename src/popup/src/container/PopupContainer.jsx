@@ -1,3 +1,4 @@
+import CollectionsList from '../components/CollectionsList';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import React, {Component, PropTypes} from 'react';
 import LoginForm from '../components/LoginForm';
@@ -22,21 +23,23 @@ class PopupContainer extends Component {
 
   render() {
     return (
-      <div className="container-fluid">
+      <main className="container-fluid popup">
+        <header className="row">
+          <div className="logo">MyPleasure</div>
+        </header>
         {
           this.props.user.get('isLoggedIn') === true ?
-          'HELLO!' :
+          <CollectionsList collections={this.props.user.get('collections')} /> :
           <LoginForm
             loginClickHandler={this.loginClickHandler}
             loginFbClickHandler={this.loginFbClickHandler}
           />
         }
-      </div>
+      </main>
     );
   }
 
   loginClickHandler({username, password}) {
-    console.log('click handler')
     this.props.dispatch(login({username, password}))
   }
 

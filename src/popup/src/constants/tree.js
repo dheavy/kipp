@@ -7,6 +7,6 @@ export const INITIAL_STATE = Map({
     token: '',
     lastLogin: null,
     lastAction: null,
-    collections: Map()
+    collections: List()
   })
 });

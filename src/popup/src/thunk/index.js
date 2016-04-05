@@ -1,4 +1,4 @@
-import {Map} from 'immutable';
+import {Map, List} from 'immutable';
 import {
   LOGIN_REQUEST_BEGIN,
   LOGIN_REQUEST_SUCCESS,
@@ -45,14 +45,14 @@ export function login({username, password}) {
         token: 'some.token',
         lastLogin: new Date(),
         lastAction: new Date(),
-        collections: Map(
-          {id: 0, thumbnail: '//placehold.it/100/80', name: 'my collection 1'},
-          {id: 1, thumbnail: '//placehold.it/100/80', name: 'my collection 2'},
-          {id: 2, thumbnail: '//placehold.it/100/80', name: 'my collection 3'},
-          {id: 3, thumbnail: '//placehold.it/100/80', name: 'my collection 4'},
-          {id: 4, thumbnail: '//placehold.it/100/80', name: 'my collection 5'},
-          {id: 5, thumbnail: '//placehold.it/100/80', name: 'my collection 6'},
-          {id: 6, thumbnail: '//placehold.it/100/80', name: 'my collection 7'},
+        collections: List.of(
+          Map({id: 0, thumbnail: '//placehold.it/100x80', name: 'my collection 1'}),
+          Map({id: 1, thumbnail: '//placehold.it/100x80', name: 'my collection 2'}),
+          Map({id: 2, thumbnail: '//placehold.it/100x80', name: 'my collection 3'}),
+          Map({id: 3, thumbnail: '//placehold.it/100x80', name: 'my collection 4'}),
+          Map({id: 4, thumbnail: '//placehold.it/100x80', name: 'my collection 5'}),
+          Map({id: 5, thumbnail: '//placehold.it/100x80', name: 'my collection 6'}),
+          Map({id: 6, thumbnail: '//placehold.it/100x80', name: 'my collection 7'})
         )
       })
     }))

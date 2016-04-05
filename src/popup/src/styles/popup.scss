@@ -1,1 +1,22 @@
-@import '../../../common/scss/_mixins';
+@import '../../../common/styles/_mixins';
+
+html, body {
+  width: 320px;
+  height: 420px;
+}
+
+.popup {
+  width: 300px;
+  height: 200px;
+  margin: 10px;
+
+  .logo {
+    background: url(../../../common/images/logo-mp.svg) center no-repeat;
+    height: 60px;
+    text-indent: -9999px;
+  }
+
+  .btns {
+    margin-bottom: 0.5em;
+  }
+}

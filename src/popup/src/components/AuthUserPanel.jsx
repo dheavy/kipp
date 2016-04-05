@@ -37,7 +37,7 @@ Options.propTypes = {
 AuthUserPanel.propTypes = {
   user: ImmutablePropTypes.mapContains({
     username: PropTypes.string,
-    collections: ImmutablePropTypes.list()
+    collections: ImmutablePropTypes.list
   });
 };
 

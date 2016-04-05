@@ -4,7 +4,7 @@ import React from 'react';
 
 const CollectionsList = props => {
   return (
-    <div className="row">
+    <div className="row collections-list">
       {props.collections.map((c, i) => {
         return (
           <CollectionItem

@@ -52,7 +52,12 @@ export function login({username, password}) {
           Map({id: 3, thumbnail: '//placehold.it/100x80', name: 'my collection 4'}),
           Map({id: 4, thumbnail: '//placehold.it/100x80', name: 'my collection 5'}),
           Map({id: 5, thumbnail: '//placehold.it/100x80', name: 'my collection 6'}),
-          Map({id: 6, thumbnail: '//placehold.it/100x80', name: 'my collection 7'})
+          Map({id: 6, thumbnail: '//placehold.it/100x80', name: 'my collection 7'}),
+          Map({id: 7, thumbnail: '//placehold.it/100x80', name: 'my collection 8'}),
+          Map({id: 8, thumbnail: '//placehold.it/100x80', name: 'my collection 9'}),
+          Map({id: 9, thumbnail: '//placehold.it/100x80', name: 'my collection 10'}),
+          Map({id: 10, thumbnail: '//placehold.it/100x80', name: 'my collection 11'}),
+          Map({id: 11, thumbnail: '//placehold.it/100x80', name: 'my collection 12'})
         )
       })
     }))

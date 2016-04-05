@@ -5,7 +5,8 @@ import {
   LOGIN_REQUEST_ERROR,
   LOGIN_FB_REQUEST_BEGIN,
   LOGIN_FB_REQUEST_SUCCESS,
-  LOGIN_FB_REQUEST_ERROR
+  LOGIN_FB_REQUEST_ERROR,
+  CHROME_MESSAGING
 } from '../constants/actions';
 
 function loginRequestBegin({username}) {
@@ -32,11 +33,31 @@ function loginFbRequestError({username, error}) {
   return {type: LOGIN_FB_REQUEST_ERROR, error: error, username: username};
 }
 
+/**
+ * Thunk action used for syncing state with other page
+ * (i.e. background) of the extension.
+ *
+ * @param  {string} options.sender       Name of the sending page.
+ * @param  {string} options.recipient    Name of the receiving page.
+ * @param  {string} options.remoteAction Optional action to trigger in receiver.
+ * @param  {any}    options.payload      Optional payload to pass to receiver.
+ * @return {Object} Action object.
+ */
+function chromeMessaging({sender, recipient, remoteAction, payload}) {
+  return {
+    type: CHROME_MESSAGING,
+    sender: sender,
+    recipient: recipient,
+    remoteAction: remoteAction,
+    payload: payload
+  };
+}
+
 export function login({username, password}) {
   return dispatch => {
     dispatch(loginRequestBegin({username}));
 
-    // Proceed with async login attempt.
+    // TODO: proceed with async login attempt.
 
     dispatch(loginRequestSuccess({
       user: Map({

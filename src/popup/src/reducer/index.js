@@ -11,6 +11,10 @@ import {
 export default function reducer(state, action) {
   switch (action.type) {
     case LOGIN_REQUEST_SUCCESS:
+      // TODO: Dispatch new async action
+      // to sync data with background page
+      // via Chrome messagning.
+      // Then refactor this part accordingly.
       return state.merge(Map({
         user: action.user
       }));

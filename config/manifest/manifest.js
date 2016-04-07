@@ -4,7 +4,7 @@ module.exports = function (version, useOptionPage) {
     version: version,
     manifest_version: 2,
     description: '__MSG_extDescription__',
-    'default_locale': 'en',
+    default_locale: 'en',
     icons: {
       '16': 'images/icon-16.png',
       '128': 'images/icon-128.png'
@@ -17,7 +17,7 @@ module.exports = function (version, useOptionPage) {
     ],
     background: {
       persistent: false,
-      scripts: ['js/event.js']
+      page: 'background.html'
     },
     content_scripts: [
       {

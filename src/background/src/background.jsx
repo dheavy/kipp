@@ -1,1 +1,1 @@
-console.log('hello from event.js');
+import React from 'react'

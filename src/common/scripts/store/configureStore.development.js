@@ -1,7 +1,7 @@
 import {createStore, applyMiddleware, compose} from 'redux';
-import storage from '../../../common/scripts/storage';
 import {INITIAL_STATE} from '../constants/tree';
 import reducer from '../reducer';
+import storage from './storage';
 import thunk from 'redux-thunk';
 
 const enhancer = compose(

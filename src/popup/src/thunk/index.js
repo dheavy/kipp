@@ -7,7 +7,7 @@ import {
   LOGIN_FB_REQUEST_SUCCESS,
   LOGIN_FB_REQUEST_ERROR,
   CHROME_MESSAGING
-} from '../constants/actions';
+} from '../../../common/scripts/constants/actions';
 
 function loginRequestBegin({username}) {
   return {type: LOGIN_REQUEST_BEGIN, username: username};

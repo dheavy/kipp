@@ -31,3 +31,4 @@ var build = function (src, filename) {
 };
 
 build(__dirname + '/../../src/popup/src/popup.html', 'popup.html');
+build(__dirname + '/../../src/background/src/background.html', 'background.html');
